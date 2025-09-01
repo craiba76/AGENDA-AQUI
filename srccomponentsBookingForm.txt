@@ -1,0 +1,65 @@
+import { useState } from "react";
+import { db, auth } from "../firebase";
+import { addDoc, collection, Timestamp } from "firebase/firestore";
+
+export default function BookingForm() {
+  const [service, setService] = useState("");
+  const [date, setDate] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser) {
+      alert("Você precisa estar logado para agendar!");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "bookings"), {
+        userId: auth.currentUser.uid,
+        userEmail: auth.currentUser.email,
+        service,
+        date: Timestamp.fromDate(new Date(date)),
+        createdAt: Timestamp.now(),
+      });
+
+      // Dispara WhatsApp via backend
+      await fetch("http://localhost:3000/send-whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service, date }),
+      });
+
+      alert("✅ Agendamento salvo e notificação enviada!");
+      setService("");
+      setDate("");
+    } catch (error) {
+      alert("❌ Erro ao salvar: " + error.message);
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto bg-white shadow-lg rounded-xl p-6 mt-10">
+      <h2 className="text-xl font-bold mb-4">Agendar Serviço</h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <input
+          type="text"
+          placeholder="Serviço (ex: Corte, Manicure...)"
+          value={service}
+          onChange={(e) => setService(e.target.value)}
+          className="border p-2 rounded-md"
+          required
+        />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="border p-2 rounded-md"
+          required
+        />
+        <button type="submit" className="w-full bg-green-500 text-white px-4 py-2 rounded-md">
+          Confirmar Agendamento
+        </button>
+      </form>
+    </div>
+  );
+}

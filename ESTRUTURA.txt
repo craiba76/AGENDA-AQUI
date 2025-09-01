@@ -1,0 +1,16 @@
+beleza-click/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── AuthForm.jsx
+│   │   └── BookingForm.jsx
+│   ├── pages/
+│   │   └── MeusAgendamentos.jsx
+│   ├── firebase.js
+│   └── App.jsx
+├── backend/
+│   └── server.js         # Backend Node.js para Z-API
+├── .env.example
+├── .gitignore
+├── package.json
+└── vite.config.js
